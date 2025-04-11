@@ -6,7 +6,7 @@ import threading
 import time
 
 # Blynk API URLs
-BLYNK_AUTH = "kGWvdkB1V91FWflMiw24KFLFztnmKPZD"  # Replace with your Blynk token
+BLYNK_AUTH = "oqVvTjuTCSu7gj4_mOiyvl1ToIfarOtb"  # Replace with your Blynk token
 LED_ON_URL = f"https://blynk.cloud/external/api/update?token={BLYNK_AUTH}&v0=1"
 LED_OFF_URL = f"https://blynk.cloud/external/api/update?token={BLYNK_AUTH}&v0=0"
 MOISTURE_URL = f"https://blynk.cloud/external/api/get?token={BLYNK_AUTH}&v1"  # Virtual pin V1 for moisture
@@ -28,7 +28,6 @@ recognizer = sr.Recognizer()
 FPS = 10  # Desired FPS
 frame_time = 1.0 / FPS
 
-
 def recognize_speech():
     global led_on
     while True:
@@ -39,7 +38,7 @@ def recognize_speech():
                 audio = recognizer.listen(source, timeout=10, phrase_time_limit=5)
                 command = recognizer.recognize_google(audio).lower()
                 print(f"Recognized: {command}")
-
+                
                 if "turn on" in command and not led_on:
                     print("Turning LED ON via Blynk (Voice)")
                     requests.get(LED_ON_URL)
@@ -55,14 +54,13 @@ def recognize_speech():
             except sr.RequestError:
                 print("Could not request results, check your internet connection")
 
-
 # Run speech recognition in a separate thread
 speech_thread = threading.Thread(target=recognize_speech, daemon=True)
 speech_thread.start()
 
 while cap.isOpened():
     start_time = time.time()
-
+    
     ret, frame = cap.read()
     if not ret:
         continue
@@ -91,11 +89,11 @@ while cap.isOpened():
             index_finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
             x, y = int(index_finger_tip.x * frame.shape[1]), int(index_finger_tip.y * frame.shape[0])
             cv2.circle(frame, (x, y), 10, (0, 255, 0), -1)
-
+            
             # Define ON/OFF button areas
             on_area = (50, 100, 150, 200)
             off_area = (250, 100, 350, 200)
-
+            
             if on_area[0] < x < on_area[2] and on_area[1] < y < off_area[3] and not led_on:
                 print("Turning LED ON via Blynk (Gesture)")
                 requests.get(LED_ON_URL)
